@@ -17,7 +17,7 @@ class _CallState extends State<Call> {
   int? _remoteUid;
   bool _localUserJoined = false;
   late final RtcEngine _engine = createAgoraRtcEngine();
-  final bool _muted = false;
+  bool _muted = false;
 
   @override
   void initState() {
@@ -90,13 +90,13 @@ class _CallState extends State<Call> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Center(
-              child: _remoteVideo(),
-            ),
-            Align(
+      body: Stack(
+        children: [
+          Center(
+            child: _remoteVideo(),
+          ),
+          SafeArea(
+            child: Align(
               alignment: Alignment.topLeft,
               child: Container(
                 margin: const EdgeInsets.all(20),
@@ -118,13 +118,20 @@ class _CallState extends State<Call> {
                 ),
               ),
             ),
-            Align(
+          ),
+          SafeArea(
+            child: Align(
               alignment: Alignment.bottomCenter,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   RawMaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _engine.muteLocalAudioStream(!_muted);
+                      setState(() {
+                        _muted = !_muted;
+                      });
+                    },
                     shape: const CircleBorder(),
                     elevation: 2.0,
                     fillColor: _muted ? Colors.blueAccent : Colors.white,
@@ -151,7 +158,9 @@ class _CallState extends State<Call> {
                     ),
                   ),
                   RawMaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _engine.switchCamera();
+                    },
                     shape: const CircleBorder(),
                     elevation: 2.0,
                     fillColor: Colors.white,
@@ -165,8 +174,8 @@ class _CallState extends State<Call> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
