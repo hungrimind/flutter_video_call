@@ -38,3 +38,4 @@ pubspec.lock
 .metadata
 **.iml
 .idea/**
+lib/consts.dart
