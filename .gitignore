@@ -25,3 +25,16 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Don't merge platform specific code
+/android/**
+/ios/**
+/linux/**
+/macos/**
+/windows/**
+/web/**
+/test/**
+pubspec.lock
+.metadata
+**.iml
+.idea/**
