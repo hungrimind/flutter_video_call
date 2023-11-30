@@ -41,8 +41,8 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
 
     _animController = AnimationController(
-      lowerBound: 0.3,
-      upperBound: 0.5,
+      lowerBound: 0.6,
+      upperBound: 0.9,
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat(reverse: true);
@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const Spacer(flex: 1),
             Form(
               key: _formKey,
               child: Column(
@@ -131,6 +132,7 @@ class _MyHomePageState extends State<MyHomePage>
                 ],
               ),
             ),
+            const Spacer(flex: 2),
           ],
         ),
       ),
