@@ -4,6 +4,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_video_call/buttons.dart';
 import 'package:flutter_video_call/consts.dart';
+import 'package:flutter_video_call/token.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class Call extends StatefulWidget {
@@ -17,7 +18,7 @@ class Call extends StatefulWidget {
 class _CallState extends State<Call> {
   final List<int> _remoteUsers = [];
   int? _localUser;
-  late final RtcEngine _engine = createAgoraRtcEngine();
+  final RtcEngine _engine = createAgoraRtcEngine();
 
   @override
   void initState() {
@@ -25,8 +26,20 @@ class _CallState extends State<Call> {
     initAgora();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    disposeAgora();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _callLayout(_remoteUsers.length),
+    );
+  }
+
   Future<void> initAgora() async {
-    // retrieve permissions
     await [Permission.microphone, Permission.camera].request();
 
     await _engine.initialize(const RtcEngineContext(
@@ -45,9 +58,7 @@ class _CallState extends State<Call> {
         onError: (ErrorCodeType code, String message) {
           debugPrint("onError $code $message");
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Error: $code, $message"),
-            ),
+            SnackBar(content: Text("Error: $code, $message")),
           );
           Navigator.pop(context);
         },
@@ -64,6 +75,10 @@ class _CallState extends State<Call> {
             _remoteUsers.remove(remoteUid);
           });
         },
+        onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
+          debugPrint('Token expiring...');
+          renewToken();
+        },
       ),
     );
 
@@ -72,122 +87,82 @@ class _CallState extends State<Call> {
     await _engine.startPreview();
 
     await _engine.joinChannel(
-      token: token,
+      token: await fetchToken(0, widget.roomName),
       channelId: widget.roomName,
       uid: 0,
       options: const ChannelMediaOptions(),
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-
-    _dispose();
-  }
-
-  Future<void> _dispose() async {
+  Future<void> disposeAgora() async {
     await _engine.leaveChannel();
     await _engine.release();
   }
 
-  Widget _callLayout(int remoteUserCount) {
-    switch (remoteUserCount) {
-      case 0:
-        return _localUser != null
-            ? Stack(
-                children: [
-                  AgoraVideoView(
-                    controller: VideoViewController(
-                      rtcEngine: _engine,
-                      canvas: const VideoCanvas(
-                        uid: 0,
-                      ),
-                    ),
-                  ),
-                  CallButtons(engine: _engine),
-                ],
-              )
-            : const Center(child: CircularProgressIndicator());
-      case 1:
-        return Stack(
-          children: [
-            remoteVideo(_remoteUsers[0]),
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  margin: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  width: 100,
-                  height: 150,
-                  child: Center(
-                    child: _localUser != null
-                        ? AgoraVideoView(
-                            controller: VideoViewController(
-                              rtcEngine: _engine,
-                              canvas: const VideoCanvas(uid: 0),
-                            ),
-                          )
-                        : const CircularProgressIndicator(),
-                  ),
-                ),
-              ),
-            ),
-            CallButtons(engine: _engine),
-          ],
-        );
-      case 2:
-        return Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(child: remoteVideo(_remoteUsers[0])),
-                Expanded(child: remoteVideo(_remoteUsers[1])),
-              ],
-            ),
-            SafeArea(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  margin: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  width: 100,
-                  height: 150,
-                  child: Center(
-                    child: _localUser != null
-                        ? AgoraVideoView(
-                            controller: VideoViewController(
-                              rtcEngine: _engine,
-                              canvas: const VideoCanvas(uid: 0),
-                            ),
-                          )
-                        : const CircularProgressIndicator(),
-                  ),
-                ),
-              ),
-            ),
-            CallButtons(engine: _engine),
-          ],
-        );
-      default:
-        return const Center(
-          child: Text("This app supports up to 3 people in a call"),
-        );
-    }
+  Future<void> renewToken() async {
+    String token = await fetchToken(0, widget.roomName);
+    _engine.renewToken(token);
   }
 
-  // Create UI with local view and remote view
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _callLayout(_remoteUsers.length),
+  Widget _callLayout(int remoteUserCount) {
+    return Stack(
+      children: [
+        switch (remoteUserCount) {
+          0 => localVideo(),
+          1 => Stack(
+              children: [
+                remoteVideo(_remoteUsers[0]),
+                miniLocalVideo(),
+              ],
+            ),
+          2 => Stack(
+              children: [
+                Column(
+                  children: [
+                    Expanded(child: remoteVideo(_remoteUsers[0])),
+                    Expanded(child: remoteVideo(_remoteUsers[1])),
+                  ],
+                ),
+                miniLocalVideo(),
+              ],
+            ),
+          _ => const Center(
+              child: Text("This app supports up to 3 people in a call"),
+            ),
+        },
+        CallButtons(engine: _engine)
+      ],
+    );
+  }
+
+  Widget miniLocalVideo() {
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: Container(
+          margin: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          clipBehavior: Clip.antiAlias,
+          width: 100,
+          height: 150,
+          child: localVideo(),
+        ),
+      ),
+    );
+  }
+
+  Widget localVideo() {
+    return Center(
+      child: _localUser != null
+          ? AgoraVideoView(
+              controller: VideoViewController(
+                rtcEngine: _engine,
+                canvas: const VideoCanvas(uid: 0),
+              ),
+            )
+          : const CircularProgressIndicator(),
     );
   }
 

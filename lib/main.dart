@@ -33,29 +33,8 @@ class _MyHomePageState extends State<MyHomePage>
   final _formKey = GlobalKey<FormState>();
   final _controller = TextEditingController(); // Add this line
 
-  late AnimationController _animController;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animController = AnimationController(
-      lowerBound: 0.6,
-      upperBound: 0.9,
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _animation = CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeIn,
-    );
-  }
-
   @override
   void dispose() {
-    _animController.dispose();
     _controller.dispose(); // Add this line
     super.dispose();
   }
@@ -72,23 +51,10 @@ class _MyHomePageState extends State<MyHomePage>
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.network(
-                        "https://i.pinimg.com/564x/d5/10/46/d510468ac1956dd7a057e254f89746af.jpg",
-                        width: 300,
-                        opacity: _animation,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Image.network(
-                          'https://www.hungrimind.com/logo.png',
-                          height: 100,
-                          width: 100,
-                        ),
-                      ),
-                    ],
+                  Image.network(
+                    'https://www.hungrimind.com/logo-dark.png',
+                    height: 100,
+                    width: 100,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
