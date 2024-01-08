@@ -30,11 +30,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
-  final _controller = TextEditingController(); // Add this line
+  final _controller = TextEditingController();
 
   @override
   void dispose() {
-    _controller.dispose(); // Add this line
+    _controller.dispose();
     super.dispose();
   }
 
@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextFormField(
-                      controller: _controller, // Add this line
+                      controller: _controller,
                       decoration: const InputDecoration(
                           labelText: 'Room Name', border: OutlineInputBorder()),
                       validator: (value) {
