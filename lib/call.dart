@@ -50,33 +50,28 @@ class _CallState extends State<Call> {
     _engine.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-          debugPrint("local user ${connection.localUid} joined");
           setState(() {
             _localUser = connection.localUid;
           });
         },
         onError: (ErrorCodeType code, String message) {
-          debugPrint("onError $code $message");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error: $code, $message")),
           );
           Navigator.pop(context);
         },
         onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-          debugPrint("remote user $remoteUid joined");
           setState(() {
             _remoteUsers.add(remoteUid);
           });
         },
         onUserOffline: (RtcConnection connection, int remoteUid,
             UserOfflineReasonType reason) {
-          debugPrint("remote user $remoteUid left channel");
           setState(() {
             _remoteUsers.remove(remoteUid);
           });
         },
         onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-          debugPrint('Token expiring...');
           renewToken();
         },
       ),
@@ -84,7 +79,6 @@ class _CallState extends State<Call> {
 
     await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
     await _engine.enableVideo();
-    await _engine.startPreview();
 
     await _engine.joinChannel(
       token: await fetchToken(0, widget.roomName),
@@ -159,7 +153,7 @@ class _CallState extends State<Call> {
           ? AgoraVideoView(
               controller: VideoViewController(
                 rtcEngine: _engine,
-                canvas: const VideoCanvas(uid: 0),
+                canvas: VideoCanvas(uid: _localUser),
               ),
             )
           : const CircularProgressIndicator(),
