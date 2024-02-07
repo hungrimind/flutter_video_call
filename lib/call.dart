@@ -35,7 +35,34 @@ class _CallState extends State<Call> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _callLayout(_remoteUsers.length),
+      body: Stack(
+        children: [
+          switch (_remoteUsers.length) {
+            0 => localVideo(),
+            1 => Stack(
+                children: [
+                  remoteVideo(_remoteUsers[0]),
+                  miniLocalVideo(),
+                ],
+              ),
+            2 => Stack(
+                children: [
+                  Column(
+                    children: [
+                      Expanded(child: remoteVideo(_remoteUsers[0])),
+                      Expanded(child: remoteVideo(_remoteUsers[1])),
+                    ],
+                  ),
+                  miniLocalVideo(),
+                ],
+              ),
+            _ => const Center(
+                child: Text("This app supports up to 3 people in a call"),
+              ),
+          },
+          CallButtons(engine: _engine)
+        ],
+      ),
     );
   }
 
@@ -96,37 +123,6 @@ class _CallState extends State<Call> {
   Future<void> renewToken() async {
     String token = await fetchToken(0, widget.roomName);
     _engine.renewToken(token);
-  }
-
-  Widget _callLayout(int remoteUserCount) {
-    return Stack(
-      children: [
-        switch (remoteUserCount) {
-          0 => localVideo(),
-          1 => Stack(
-              children: [
-                remoteVideo(_remoteUsers[0]),
-                miniLocalVideo(),
-              ],
-            ),
-          2 => Stack(
-              children: [
-                Column(
-                  children: [
-                    Expanded(child: remoteVideo(_remoteUsers[0])),
-                    Expanded(child: remoteVideo(_remoteUsers[1])),
-                  ],
-                ),
-                miniLocalVideo(),
-              ],
-            ),
-          _ => const Center(
-              child: Text("This app supports up to 3 people in a call"),
-            ),
-        },
-        CallButtons(engine: _engine)
-      ],
-    );
   }
 
   Widget miniLocalVideo() {
