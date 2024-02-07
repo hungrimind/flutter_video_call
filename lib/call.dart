@@ -149,7 +149,7 @@ class _CallState extends State<Call> {
           ? AgoraVideoView(
               controller: VideoViewController(
                 rtcEngine: _engine,
-                canvas: VideoCanvas(uid: _localUser),
+                canvas: const VideoCanvas(uid: 0),
               ),
             )
           : const CircularProgressIndicator(),
