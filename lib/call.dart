@@ -144,16 +144,14 @@ class _CallState extends State<Call> {
   }
 
   Widget localVideo() {
-    return Center(
-      child: _localUser != null
-          ? AgoraVideoView(
-              controller: VideoViewController(
-                rtcEngine: _engine,
-                canvas: const VideoCanvas(uid: 0),
-              ),
-            )
-          : const CircularProgressIndicator(),
-    );
+    return _localUser != null
+        ? AgoraVideoView(
+            controller: VideoViewController(
+              rtcEngine: _engine,
+              canvas: const VideoCanvas(uid: 0),
+            ),
+          )
+        : const Center(child: CircularProgressIndicator());
   }
 
   Widget remoteVideo(int remoteUid) {
