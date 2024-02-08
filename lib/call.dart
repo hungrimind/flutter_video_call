@@ -98,8 +98,10 @@ class _CallState extends State<Call> {
             _remoteUsers.remove(remoteUid);
           });
         },
-        onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-          renewToken();
+        onTokenPrivilegeWillExpire:
+            (RtcConnection connection, String token) async {
+          String token = await fetchToken(0, widget.roomName);
+          _engine.renewToken(token);
         },
       ),
     );
@@ -118,11 +120,6 @@ class _CallState extends State<Call> {
   Future<void> disposeAgora() async {
     await _engine.leaveChannel();
     await _engine.release();
-  }
-
-  Future<void> renewToken() async {
-    String token = await fetchToken(0, widget.roomName);
-    _engine.renewToken(token);
   }
 
   Widget miniLocalVideo() {
