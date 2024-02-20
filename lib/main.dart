@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: const MyHomePage(),
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: const ColorScheme.light(
           primary: Colors.black,
@@ -51,19 +52,20 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 children: <Widget>[
                   Image.network(
-                    'https://www.hungrimind.com/logo-dark.png',
-                    height: 100,
-                    width: 100,
+                    'https://www.hungrimind.com/logo-agora.png',
+                    height: 200,
+                    width: 200,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: TextFormField(
                       controller: _controller,
                       decoration: const InputDecoration(
-                          labelText: 'Room Name', border: OutlineInputBorder()),
+                          labelText: 'Channel Name',
+                          border: OutlineInputBorder()),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter room name';
+                          return 'Please enter channel name';
                         }
                         return null;
                       },
@@ -76,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => Call(
-                              roomName: _controller.text,
+                              channelName: _controller.text,
                             ),
                           ),
                         );
@@ -88,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: [
                         Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: Text('Join Room'),
+                          child: Text('Join Channel'),
                         ),
                         Icon(Icons.arrow_forward),
                       ],

@@ -8,8 +8,8 @@ import 'package:flutter_video_call/token.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class Call extends StatefulWidget {
-  final String roomName;
-  const Call({Key? key, required this.roomName}) : super(key: key);
+  final String channelName;
+  const Call({Key? key, required this.channelName}) : super(key: key);
 
   @override
   State<Call> createState() => _CallState();
@@ -100,7 +100,7 @@ class _CallState extends State<Call> {
         },
         onTokenPrivilegeWillExpire:
             (RtcConnection connection, String token) async {
-          String token = await fetchToken(0, widget.roomName);
+          String token = await fetchToken(0, widget.channelName);
           _engine.renewToken(token);
         },
       ),
@@ -110,8 +110,8 @@ class _CallState extends State<Call> {
     await _engine.enableVideo();
 
     await _engine.joinChannel(
-      token: await fetchToken(0, widget.roomName),
-      channelId: widget.roomName,
+      token: await fetchToken(0, widget.channelName),
+      channelId: widget.channelName,
       uid: 0,
       options: const ChannelMediaOptions(),
     );
@@ -158,7 +158,7 @@ class _CallState extends State<Call> {
         canvas: VideoCanvas(
           uid: remoteUid,
         ),
-        connection: RtcConnection(channelId: widget.roomName),
+        connection: RtcConnection(channelId: widget.channelName),
       ),
     );
   }
